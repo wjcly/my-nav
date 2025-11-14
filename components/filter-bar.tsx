@@ -70,19 +70,19 @@ export function FilterBar() {
 
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:gap-6">
+    <div className="flex flex-col gap-4 md:gap-6">
       {/* 标签筛选 */}
-      <div className="flex flex-wrap gap-2 md:gap-3">
+      <div className="flex flex-wrap gap-2 md:gap-2.5 justify-center sm:justify-start">
         {tags.map((tag) => {
           const isSelected = selectedTags.includes(tag.name)
           return (
             <Badge
               key={tag.id}
               variant={isSelected ? "default" : "outline"}
-              className={`cursor-pointer transition-all duration-200 text-sm px-4 py-1.5 font-medium ${
+              className={`cursor-pointer transition-all duration-300 text-sm px-4 py-2 font-medium rounded-full ${
                 isSelected
-                  ? "bg-primary text-primary-foreground shadow-sm scale-105"
-                  : "hover:bg-accent hover:text-accent-foreground hover:scale-105 border-2"
+                  ? "bg-primary text-primary-foreground scale-105 border-2 border-primary/50"
+                  : "bg-background/60 backdrop-blur-md hover:bg-background/80 hover:text-foreground hover:scale-105 border-2 border-border/50 hover:border-primary/30"
               }`}
               onClick={() => toggleTag(tag.name)}
             >
@@ -93,7 +93,7 @@ export function FilterBar() {
       </div>
 
       {/* 排序 - 使用 ToggleGroup */}
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center justify-end gap-2">
         <ToggleGroup
           type="single"
           value={sortBy ?? undefined}
@@ -102,23 +102,23 @@ export function FilterBar() {
           }}
           variant="outline"
           size="sm"
-          className="bg-background/50 backdrop-blur-sm"
+          className="bg-background/60 backdrop-blur-md border-2 border-border/50 rounded-lg p-1"
         >
           <ToggleGroupItem 
             value="created" 
             aria-label="按创建时间排序"
-            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:shadow-sm transition-all duration-200 hover:scale-105 border-2"
+            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-all duration-300 hover:scale-105 rounded-md border-0"
           >
-            <Clock className="h-4 w-4 mr-2" />
+            <Clock className="h-4 w-4 mr-1.5" />
             <span className="hidden sm:inline">按创建时间</span>
             <span className="sm:hidden">最新</span>
           </ToggleGroupItem>
           <ToggleGroupItem 
             value="visits" 
             aria-label="按访问量排序"
-            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:shadow-sm transition-all duration-200 hover:scale-105 border-2"
+            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-all duration-300 hover:scale-105 rounded-md border-0"
           >
-            <TrendingUp className="h-4 w-4 mr-2" />
+            <TrendingUp className="h-4 w-4 mr-1.5" />
             <span className="hidden sm:inline">按访问量</span>
             <span className="sm:hidden">热门</span>
           </ToggleGroupItem>

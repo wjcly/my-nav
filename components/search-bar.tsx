@@ -50,15 +50,18 @@ export function SearchBar() {
   }, [search])
 
   return (
-    <div className="relative max-w-xl md:max-w-2xl mx-auto">
-      <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground transition-colors duration-200" />
-      <Input
-        type="search"
-        placeholder="搜索网站..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="pl-12 h-14 md:h-16 text-base shadow-sm border-2 transition-all duration-200 focus:shadow-md focus:border-primary/50 hover:border-primary/30"
-      />
+    <div className="relative max-w-2xl md:max-w-3xl mx-auto">
+      <div className="relative group">
+        <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 text-muted-foreground transition-all duration-300 group-focus-within:text-foreground z-10" />
+        <Input
+          type="search"
+          placeholder="搜索网站、标签或关键词..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-14 md:pl-16 h-16 md:h-20 text-base md:text-lg bg-background/80 backdrop-blur-xl border-2 border-border/50 transition-all duration-300 focus:border-primary/60 focus:bg-background/95 hover:border-primary/40 rounded-2xl"
+        />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      </div>
     </div>
   )
 }
