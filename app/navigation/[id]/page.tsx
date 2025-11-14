@@ -1,0 +1,54 @@
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
+import { NavigationDetail } from "@/components/navigation-detail"
+import { notFound } from "next/navigation"
+import { prisma } from "@/lib/prisma"
+
+async function getNavigation(id: string) {
+  const navigation = await prisma.navigation.findUnique({
+    where: { id },
+    include: {
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
+  })
+
+  if (!navigation) {
+    return null
+  }
+
+  // 增加访问量
+  await prisma.navigation.update({
+    where: { id },
+    data: { visits: { increment: 1 } },
+  })
+
+  return navigation
+}
+
+export default async function NavigationPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const navigation = await getNavigation(id)
+
+  if (!navigation) {
+    notFound()
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-pattern">
+      <Header />
+      <main className="flex-1 container px-4 py-8">
+        <NavigationDetail navigation={navigation} />
+      </main>
+      <Footer />
+    </div>
+  )
+}
+

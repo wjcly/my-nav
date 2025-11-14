@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Navigation {
+  id              String    @id @default(cuid())
+  title           String
+  shortDescription String?  @map("short_description")
+  description     String?   @db.Text
+  url             String
+  icon            String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  visits          Int       @default(0)
+  tags            NavigationTag[]
+
+  @@map("navigations")
+}
+
+model Tag {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  navigations   NavigationTag[]
+
+  @@map("tags")
+}
+
+model NavigationTag {
+  id            String      @id @default(cuid())
+  navigationId  String      @map("navigation_id")
+  tagId         String      @map("tag_id")
+  navigation    Navigation   @relation(fields: [navigationId], references: [id], onDelete: Cascade)
+  tag           Tag          @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  @@unique([navigationId, tagId])
+  @@map("navigation_tags")
+}
