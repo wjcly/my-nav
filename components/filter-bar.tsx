@@ -78,16 +78,23 @@ export function FilterBar() {
     <div className="flex flex-col gap-4">
       {/* 标签筛选 */}
       <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <Badge
-            key={tag.id}
-            variant={selectedTags.includes(tag.name) ? "default" : "outline"}
-            className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors text-sm px-3 py-1"
-            onClick={() => toggleTag(tag.name)}
-          >
-            {tag.name}
-          </Badge>
-        ))}
+        {tags.map((tag) => {
+          const isSelected = selectedTags.includes(tag.name)
+          return (
+            <Badge
+              key={tag.id}
+              variant={isSelected ? "default" : "outline"}
+              className={`cursor-pointer transition-all text-sm px-3 py-1 ${
+                isSelected
+                  ? ""
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+              onClick={() => toggleTag(tag.name)}
+            >
+              {tag.name}
+            </Badge>
+          )
+        })}
       </div>
 
       {/* 排序 */}
