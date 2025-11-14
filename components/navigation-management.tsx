@@ -1,18 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import {
   Table,
   TableBody,
@@ -22,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Pencil, Trash2, X, RefreshCw } from "lucide-react"
+import { Plus, Pencil, Trash2, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface Navigation {
@@ -39,24 +29,11 @@ interface Navigation {
 
 export function NavigationManagement() {
   const [navigations, setNavigations] = useState<Navigation[]>([])
-  const [tags, setTags] = useState<{ id: string; name: string }[]>([])
   const [loading, setLoading] = useState(true)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
-    title: "",
-    url: "",
-    shortDescription: "",
-    description: "",
-    icon: "",
-    tagInput: "",
-    selectedTags: [] as string[],
-  })
   const { toast } = useToast()
 
   useEffect(() => {
     fetchNavigations()
-    fetchTags()
   }, [])
 
   const fetchNavigations = async () => {
@@ -72,56 +49,6 @@ export function NavigationManagement() {
       })
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchTags = async () => {
-    try {
-      const res = await fetch("/api/tags")
-      const data = await res.json()
-      setTags(data)
-    } catch (error) {
-      console.error("Failed to fetch tags:", error)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      const method = editingId ? "PUT" : "POST"
-      const url = editingId
-        ? `/api/navigations/${editingId}`
-        : "/api/navigations"
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: formData.title,
-          url: formData.url,
-          shortDescription: formData.shortDescription || null,
-          description: formData.description || null,
-          icon: formData.icon || null,
-          tagIds: formData.selectedTags,
-        }),
-      })
-
-      if (!res.ok) throw new Error("操作失败")
-
-      toast({
-        title: "成功",
-        description: editingId ? "更新成功" : "创建成功",
-      })
-
-      setDialogOpen(false)
-      resetForm()
-      fetchNavigations()
-    } catch (error) {
-      toast({
-        title: "错误",
-        description: "操作失败",
-        variant: "destructive",
-      })
     }
   }
 
@@ -148,80 +75,6 @@ export function NavigationManagement() {
         variant: "destructive",
       })
     }
-  }
-
-  const handleEdit = (nav: Navigation) => {
-    setEditingId(nav.id)
-    setFormData({
-      title: nav.title,
-      url: nav.url,
-      shortDescription: nav.shortDescription || "",
-      description: nav.description || "",
-      icon: nav.icon || "",
-      tagInput: "",
-      selectedTags: nav.tags.map((t) => t.tag.id),
-    })
-    setDialogOpen(true)
-  }
-
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      url: "",
-      shortDescription: "",
-      description: "",
-      icon: "",
-      tagInput: "",
-      selectedTags: [],
-    })
-    setEditingId(null)
-  }
-
-  const handleTagInputKeyDown = async (
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.key === "Enter" && formData.tagInput.trim()) {
-      e.preventDefault()
-      const tagName = formData.tagInput.trim()
-
-      // 检查标签是否已存在
-      let tag = tags.find((t) => t.name === tagName)
-      if (!tag) {
-        // 创建新标签
-        try {
-          const res = await fetch("/api/tags", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: tagName }),
-          })
-          const newTag = await res.json()
-          tag = newTag
-          setTags([...tags, tag])
-        } catch (error) {
-          toast({
-            title: "错误",
-            description: "创建标签失败",
-            variant: "destructive",
-          })
-          return
-        }
-      }
-
-      if (tag && !formData.selectedTags.includes(tag.id)) {
-        setFormData({
-          ...formData,
-          selectedTags: [...formData.selectedTags, tag.id],
-          tagInput: "",
-        })
-      }
-    }
-  }
-
-  const removeTag = (tagId: string) => {
-    setFormData({
-      ...formData,
-      selectedTags: formData.selectedTags.filter((id) => id !== tagId),
-    })
   }
 
   const handleUpdateFavicons = async () => {
@@ -269,136 +122,12 @@ export function NavigationManagement() {
             <RefreshCw className="mr-2 h-4 w-4" />
             更新 Favicon
           </Button>
-          <Dialog
-            open={dialogOpen}
-            onOpenChange={(open) => {
-              setDialogOpen(open)
-              if (!open) resetForm()
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                添加导航
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingId ? "编辑导航" : "添加导航"}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingId
-                    ? "修改导航信息"
-                    : "添加一个新的导航网站"}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">网站名称 *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="url">网站地址 *</Label>
-                  <Input
-                    id="url"
-                    type="url"
-                    value={formData.url}
-                    onChange={(e) =>
-                      setFormData({ ...formData, url: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="shortDescription">简短描述</Label>
-                  <Input
-                    id="shortDescription"
-                    value={formData.shortDescription}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        shortDescription: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">详细介绍</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    rows={6}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="icon">图标URL</Label>
-                  <Input
-                    id="icon"
-                    type="url"
-                    value={formData.icon}
-                    onChange={(e) =>
-                      setFormData({ ...formData, icon: e.target.value })
-                    }
-                    placeholder="https://example.com/favicon.ico"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tags">标签</Label>
-                  <Input
-                    id="tags"
-                    value={formData.tagInput}
-                    onChange={(e) =>
-                      setFormData({ ...formData, tagInput: e.target.value })
-                    }
-                    onKeyDown={handleTagInputKeyDown}
-                    placeholder="输入标签后按回车添加"
-                  />
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.selectedTags.map((tagId) => {
-                      const tag = tags.find((t) => t.id === tagId)
-                      return tag ? (
-                        <Badge
-                          key={tagId}
-                          variant="secondary"
-                          className="cursor-pointer"
-                          onClick={() => removeTag(tagId)}
-                        >
-                          {tag.name}
-                          <X className="ml-1 h-3 w-3" />
-                        </Badge>
-                      ) : null
-                    })}
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setDialogOpen(false)
-                      resetForm()
-                    }}
-                  >
-                    取消
-                  </Button>
-                  <Button type="submit">
-                    {editingId ? "更新" : "创建"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Link href="/admin/navigations/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              添加导航
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -452,13 +181,11 @@ export function NavigationManagement() {
                   <TableCell>{nav.visits}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(nav)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                      <Link href={`/admin/navigations/${nav.id}/edit`}>
+                        <Button variant="ghost" size="icon">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
                       <Button
                         variant="ghost"
                         size="icon"

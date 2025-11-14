@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ExternalLink, Eye, Calendar } from "lucide-react"
 import Image from "next/image"
+import { RichTextRenderer } from "@/components/rich-text-renderer"
 
 interface NavigationDetailProps {
   navigation: {
@@ -94,10 +95,7 @@ export function NavigationDetail({ navigation }: NavigationDetailProps) {
             <CardTitle>详细介绍</CardTitle>
           </CardHeader>
           <CardContent>
-            <div
-              className="prose prose-sm max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: navigation.description }}
-            />
+            <RichTextRenderer content={navigation.description} />
           </CardContent>
         </Card>
       )}
