@@ -50,14 +50,14 @@ export function SearchBar() {
   }, [search])
 
   return (
-    <div className="relative max-w-2xl mx-auto">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="relative max-w-xl md:max-w-2xl mx-auto">
+      <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground transition-colors duration-200" />
       <Input
         type="search"
         placeholder="搜索网站..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="pl-10 h-12 text-base"
+        className="pl-12 h-14 md:h-16 text-base shadow-sm border-2 transition-all duration-200 focus:shadow-md focus:border-primary/50 hover:border-primary/30"
       />
     </div>
   )

@@ -37,7 +37,7 @@ export function Header() {
               提交网站
             </Button>
             <Link
-              href="https://github.com"
+              href="https://github.com/leyen-me/nav"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium transition-colors hover:text-primary"

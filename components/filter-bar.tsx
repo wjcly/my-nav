@@ -2,14 +2,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ArrowUpDown, Clock, TrendingUp } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Clock, TrendingUp } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 type SortType = "created" | "visits" | null
@@ -74,20 +68,21 @@ export function FilterBar() {
     )
   }
 
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:gap-6">
       {/* 标签筛选 */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 md:gap-3">
         {tags.map((tag) => {
           const isSelected = selectedTags.includes(tag.name)
           return (
             <Badge
               key={tag.id}
               variant={isSelected ? "default" : "outline"}
-              className={`cursor-pointer transition-all text-sm px-3 py-1 ${
+              className={`cursor-pointer transition-all duration-200 text-sm px-4 py-1.5 font-medium ${
                 isSelected
-                  ? ""
-                  : "hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-primary text-primary-foreground shadow-sm scale-105"
+                  : "hover:bg-accent hover:text-accent-foreground hover:scale-105 border-2"
               }`}
               onClick={() => toggleTag(tag.name)}
             >
@@ -97,29 +92,37 @@ export function FilterBar() {
         })}
       </div>
 
-      {/* 排序 */}
-      <div className="flex items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <ArrowUpDown className="mr-2 h-4 w-4" />
-              排序
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={() => setSortBy("created")}>
-              <Clock className="mr-2 h-4 w-4" />
-              按创建时间
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSortBy("visits")}>
-              <TrendingUp className="mr-2 h-4 w-4" />
-              按访问量
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSortBy(null)}>
-              清除排序
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* 排序 - 使用 ToggleGroup */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <ToggleGroup
+          type="single"
+          value={sortBy ?? undefined}
+          onValueChange={(value) => {
+            setSortBy((value || null) as SortType)
+          }}
+          variant="outline"
+          size="sm"
+          className="bg-background/50 backdrop-blur-sm"
+        >
+          <ToggleGroupItem 
+            value="created" 
+            aria-label="按创建时间排序"
+            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:shadow-sm transition-all duration-200 hover:scale-105 border-2"
+          >
+            <Clock className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">按创建时间</span>
+            <span className="sm:hidden">最新</span>
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="visits" 
+            aria-label="按访问量排序"
+            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:shadow-sm transition-all duration-200 hover:scale-105 border-2"
+          >
+            <TrendingUp className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">按访问量</span>
+            <span className="sm:hidden">热门</span>
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
     </div>
   )

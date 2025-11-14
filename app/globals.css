@@ -128,3 +128,18 @@ body {
   animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ToggleGroup 选中状态样式修复 - 使用更明显的颜色 */
+[data-slot="toggle-group-item"][data-state="on"] {
+  background-color: var(--color-primary) !important;
+  color: var(--color-primary-foreground) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* 确保选中状态在暗色模式下也可见 */
+.dark [data-slot="toggle-group-item"][data-state="on"],
+html.dark [data-slot="toggle-group-item"][data-state="on"] {
+  background-color: var(--color-primary) !important;
+  color: var(--color-primary-foreground) !important;
+  border-color: var(--color-primary) !important;
+}
+
