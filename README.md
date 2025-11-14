@@ -24,27 +24,45 @@
 - **动画**: GSAP
 - **认证**: NextAuth.js
 - **数据库**: MySQL + Prisma ORM
+- **部署**: Docker + Docker Compose
 
 ## 开始使用
 
-### 1. 安装依赖
+### 方式一：Docker 部署（推荐）
+
+使用 Docker Compose 一键部署，包含数据库和应用：
+
+```bash
+# 1. 创建 .env 文件（参考上面的 Docker 部署章节）
+# 2. 启动服务
+docker-compose up -d
+
+# 3. 初始化管理员（如果需要）
+docker-compose exec app npm run init-admin
+```
+
+访问 [http://localhost:3000](http://localhost:3000)
+
+### 方式二：本地开发
+
+#### 1. 安装依赖
 
 ```bash
 npm install
 ```
 
-### 2. 配置环境变量
+#### 2. 配置环境变量
 
 创建 `.env` 文件：
 
 ```env
-DATABASE_URL="mysql://root:password@localhost:3306/open-search"
+DATABASE_URL="mysql://root:password@localhost:3306/nav"
 NEXTAUTH_SECRET="your-secret-key-change-in-production"
 NEXTAUTH_URL="http://localhost:3000"
 CRON_SECRET="your-cron-secret-key"
 ```
 
-### 3. 初始化数据库
+#### 3. 初始化数据库
 
 ```bash
 # 生成 Prisma 客户端
@@ -57,7 +75,7 @@ npm run db:push
 npm run init-admin
 ```
 
-### 4. 启动开发服务器
+#### 4. 启动开发服务器
 
 ```bash
 npm run dev
@@ -153,6 +171,96 @@ npm run update-favicons   # 更新 favicon
 ```
 
 ## 部署
+
+### Docker 部署（推荐）
+
+使用 Docker Compose 可以快速部署整个应用，包括数据库。
+
+#### 前置要求
+
+- Docker 20.10+
+- Docker Compose 2.0+
+
+#### 快速开始
+
+1. **创建环境变量文件**
+
+创建 `.env` 文件：
+
+```env
+# 数据库配置
+DATABASE_URL="mysql://navuser:navpassword@db:3306/nav"
+MYSQL_ROOT_PASSWORD=rootpassword
+MYSQL_DATABASE=nav
+MYSQL_USER=navuser
+MYSQL_PASSWORD=navpassword
+DB_PORT=3306
+
+# Next.js 应用配置
+APP_PORT=3000
+NODE_ENV=production
+
+# NextAuth 配置
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-secret-key-change-in-production
+
+# 自动运行数据库迁移（可选）
+RUN_MIGRATIONS=true
+```
+
+2. **启动服务**
+
+```bash
+# 构建并启动所有服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f app
+```
+
+3. **初始化数据库和管理员**
+
+如果 `RUN_MIGRATIONS=false`，需要手动运行：
+
+```bash
+# 运行数据库迁移
+docker-compose exec app npx prisma migrate deploy
+# 或使用 db push（开发环境）
+docker-compose exec app npx prisma db push
+
+# 初始化管理员账号
+docker-compose exec app npm run init-admin
+```
+
+4. **访问应用**
+
+应用将在 `http://localhost:3000` 上运行。
+
+#### 常用命令
+
+```bash
+# 停止所有服务
+docker-compose down
+
+# 停止并删除数据卷（会删除数据库数据）
+docker-compose down -v
+
+# 重新构建镜像
+docker-compose build --no-cache
+
+# 查看应用日志
+docker-compose logs -f app
+
+# 进入应用容器
+docker-compose exec app sh
+
+# 进入数据库容器
+docker-compose exec db mysql -u navuser -p nav
+```
+
+更多 Docker 部署详情请参考 [DOCKER.md](./DOCKER.md)
+
+### 传统部署
 
 1. 确保数据库已配置并运行
 2. 设置环境变量
