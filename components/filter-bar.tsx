@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Badge } from "@/components/ui/badge"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Clock, TrendingUp } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 
@@ -92,37 +91,50 @@ export function FilterBar() {
         })}
       </div>
 
-      {/* 排序 - 使用 ToggleGroup */}
-      <div className="flex items-center justify-end gap-2">
-        <ToggleGroup
-          type="single"
-          value={sortBy ?? undefined}
-          onValueChange={(value) => {
-            setSortBy((value || null) as SortType)
-          }}
-          variant="outline"
-          size="sm"
-          className="bg-background/60 backdrop-blur-md border-2 border-border/50 rounded-lg p-1"
+      {/* 排序 - 使用 div 实现，风格与 tag 保持一致 */}
+      <div className="flex flex-wrap gap-2 md:gap-2.5 justify-center sm:justify-end">
+        <div
+          onClick={() => setSortBy(sortBy === "created" ? null : "created")}
+          style={
+            sortBy === "created"
+              ? {
+                  backgroundColor: "var(--color-primary)",
+                  color: "var(--color-primary-foreground)",
+                }
+              : undefined
+          }
+          className={`cursor-pointer transition-all duration-300 text-sm px-4 py-2 font-medium rounded-full flex items-center gap-1.5 ${
+            sortBy === "created"
+              ? "scale-105 border-2 border-primary/50"
+              : "bg-background/60 backdrop-blur-md hover:bg-background/80 hover:text-foreground hover:scale-105 border-2 border-border/50 hover:border-primary/30"
+          }`}
+          aria-label="按创建时间排序"
         >
-          <ToggleGroupItem 
-            value="created" 
-            aria-label="按创建时间排序"
-            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-all duration-300 hover:scale-105 rounded-md border-0"
-          >
-            <Clock className="h-4 w-4 mr-1.5" />
-            <span className="hidden sm:inline">按创建时间</span>
-            <span className="sm:hidden">最新</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="visits" 
-            aria-label="按访问量排序"
-            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-all duration-300 hover:scale-105 rounded-md border-0"
-          >
-            <TrendingUp className="h-4 w-4 mr-1.5" />
-            <span className="hidden sm:inline">按访问量</span>
-            <span className="sm:hidden">热门</span>
-          </ToggleGroupItem>
-        </ToggleGroup>
+          <Clock className="h-4 w-4" />
+          <span className="hidden sm:inline">按创建时间</span>
+          <span className="sm:hidden">最新</span>
+        </div>
+        <div
+          onClick={() => setSortBy(sortBy === "visits" ? null : "visits")}
+          style={
+            sortBy === "visits"
+              ? {
+                  backgroundColor: "var(--color-primary)",
+                  color: "var(--color-primary-foreground)",
+                }
+              : undefined
+          }
+          className={`cursor-pointer transition-all duration-300 text-sm px-4 py-2 font-medium rounded-full flex items-center gap-1.5 ${
+            sortBy === "visits"
+              ? "scale-105 border-2 border-primary/50"
+              : "bg-background/60 backdrop-blur-md hover:bg-background/80 hover:text-foreground hover:scale-105 border-2 border-border/50 hover:border-primary/30"
+          }`}
+          aria-label="按访问量排序"
+        >
+          <TrendingUp className="h-4 w-4" />
+          <span className="hidden sm:inline">按访问量</span>
+          <span className="sm:hidden">热门</span>
+        </div>
       </div>
     </div>
   )

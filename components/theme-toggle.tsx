@@ -16,8 +16,8 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9">
-        <div className="h-4 w-4" />
+      <Button variant="ghost" size="icon" className="h-10 w-10">
+        <div className="h-5 w-5" />
       </Button>
     )
   }
@@ -41,10 +41,10 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="h-9 w-9 relative overflow-hidden group"
+      className="h-10 w-10 relative overflow-hidden group transition-all duration-200 ease-out hover:scale-105 hover:bg-accent/50"
     >
-      <Sun className={`h-4 w-4 transition-all ${isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"}`} />
-      <Moon className={`absolute h-4 w-4 transition-all ${isDark ? "rotate-0 scale-100 opacity-100" : "rotate-90 scale-0 opacity-0"}`} />
+      <Sun className={`h-5 w-5 transition-all ${isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"}`} />
+      <Moon className={`absolute h-5 w-5 transition-all ${isDark ? "rotate-0 scale-100 opacity-100" : "rotate-90 scale-0 opacity-0"}`} />
       <span className="sr-only">切换主题</span>
     </Button>
   )
