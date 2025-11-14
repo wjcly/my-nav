@@ -10,8 +10,22 @@ export function SearchBar() {
   const router = useRouter()
   const [search, setSearch] = useState(searchParams.get("q") || "")
   const timeoutRef = useRef<NodeJS.Timeout>()
+  const isInitialMount = useRef(true)
 
   useEffect(() => {
+    // 跳过首次渲染
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
+    
+    const currentQ = searchParams.get("q") || ""
+    
+    // 如果值没有改变，不更新 URL
+    if (currentQ === search) {
+      return
+    }
+    
     // 防抖处理
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
@@ -24,7 +38,7 @@ export function SearchBar() {
       } else {
         params.delete("q")
       }
-      router.push(`/?${params.toString()}`, { scroll: false })
+      router.replace(`/?${params.toString()}`, { scroll: false })
     }, 300)
 
     return () => {
@@ -32,7 +46,8 @@ export function SearchBar() {
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [search, router, searchParams])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search])
 
   return (
     <div className="relative max-w-2xl mx-auto">

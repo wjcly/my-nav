@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown, Clock, TrendingUp } from "lucide-react"
@@ -17,7 +17,11 @@ type SortType = "created" | "visits" | null
 export function FilterBar() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const isInitialMount = useRef(true)
+  const [selectedTags, setSelectedTags] = useState<string[]>(() => {
+    const tag = searchParams.get("tag")
+    return tag ? [tag] : []
+  })
   const [sortBy, setSortBy] = useState<SortType>(
     (searchParams.get("sortBy") as SortType) || null
   )
@@ -30,20 +34,39 @@ export function FilterBar() {
       .catch(console.error)
   }, [])
 
+  // 只在用户操作时更新 URL，避免循环
   useEffect(() => {
+    // 跳过首次渲染
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
+    
+    const currentTag = searchParams.get("tag")
+    const currentSortBy = searchParams.get("sortBy")
+    
+    const newTag = selectedTags.length > 0 ? selectedTags[0] : null
+    const newSortBy = sortBy
+    
+    // 只有当值真正改变时才更新 URL
+    if (currentTag === newTag && currentSortBy === newSortBy) {
+      return
+    }
+    
     const params = new URLSearchParams(searchParams.toString())
-    if (selectedTags.length > 0) {
-      params.set("tag", selectedTags[0])
+    if (newTag) {
+      params.set("tag", newTag)
     } else {
       params.delete("tag")
     }
-    if (sortBy) {
-      params.set("sortBy", sortBy)
+    if (newSortBy) {
+      params.set("sortBy", newSortBy)
     } else {
       params.delete("sortBy")
     }
-    router.push(`/?${params.toString()}`, { scroll: false })
-  }, [selectedTags, sortBy, router, searchParams])
+    router.replace(`/?${params.toString()}`, { scroll: false })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTags, sortBy])
 
   const toggleTag = (tagName: string) => {
     setSelectedTags((prev) =>
