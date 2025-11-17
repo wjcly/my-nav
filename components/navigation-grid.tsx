@@ -43,13 +43,16 @@ export function NavigationGrid() {
           throw new Error(`HTTP error! status: ${res.status}`)
         }
         
-        const data = await res.json()
+        const result = await res.json()
         
-        // 确保 data 是数组
-        if (Array.isArray(data)) {
-          setItems(data)
+        // 处理新的 API 响应格式 { data: [...], pagination: {...} }
+        if (result.data && Array.isArray(result.data)) {
+          setItems(result.data)
+        } else if (Array.isArray(result)) {
+          // 兼容旧格式（向后兼容）
+          setItems(result)
         } else {
-          console.error("Invalid data format:", data)
+          console.error("Invalid data format:", result)
           setItems([])
         }
       } catch (error) {
@@ -94,7 +97,7 @@ export function NavigationGrid() {
       {items.map((item, index) => (
         <Card
           key={item.id}
-          className="nav-card group hover:shadow-lg transition-all duration-300 hover:border-primary/50 relative animate-card-in"
+          className="nav-card group hover:shadow-lg transition-all duration-200 hover:border-primary/50 relative animate-card-in"
           style={{
             animationDelay: `${index * 30}ms`,
           }}
@@ -126,7 +129,7 @@ export function NavigationGrid() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity relative z-10"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity duration-200 relative z-10"
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
@@ -145,7 +148,7 @@ export function NavigationGrid() {
           <CardContent>
             <div className="flex flex-wrap gap-2 mb-3">
               {item.tags.slice(0, 3).map(({ tag }) => (
-                <Badge key={tag.id} variant="secondary" className="text-xs">
+                <Badge key={tag.id} variant="secondary" className="text-xs transition-all duration-200">
                   {tag.name}
                 </Badge>
               ))}

@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useToast } from "@/hooks/use-toast"
 
 interface Submission {
   id: string
@@ -41,6 +42,7 @@ export function SubmissionManagement() {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
   const [reviewAction, setReviewAction] = useState<"approve" | "reject" | null>(null)
+  const { toast } = useToast()
 
   const fetchSubmissions = async (status?: string) => {
     setLoading(true)
@@ -89,11 +91,19 @@ export function SubmissionManagement() {
         fetchSubmissions(selectedStatus === "all" ? undefined : selectedStatus)
       } else {
         const error = await response.json()
-        alert(error.error || "操作失败")
+        toast({
+          variant: "destructive",
+          title: "操作失败",
+          description: error.error || "操作失败",
+        })
       }
     } catch (error) {
       console.error("审核失败:", error)
-      alert("操作失败，请稍后重试")
+      toast({
+        variant: "destructive",
+        title: "操作失败",
+        description: "操作失败，请稍后重试",
+      })
     }
   }
 
@@ -110,6 +120,90 @@ export function SubmissionManagement() {
     }
   }
 
+  const renderTableContent = () => {
+    if (loading) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          加载中...
+        </div>
+      )
+    }
+    if (submissions.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          暂无数据
+        </div>
+      )
+    }
+    return (
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>网站名称</TableHead>
+              <TableHead>URL</TableHead>
+              <TableHead>描述</TableHead>
+              <TableHead>状态</TableHead>
+              <TableHead>提交时间</TableHead>
+              <TableHead>操作</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {submissions.map((submission) => (
+              <TableRow key={submission.id}>
+                <TableCell className="font-medium">
+                  {submission.title}
+                </TableCell>
+                <TableCell>
+                  <a
+                    href={submission.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline flex items-center gap-1"
+                  >
+                    {submission.url}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </TableCell>
+                <TableCell className="max-w-xs truncate">
+                  {submission.description || "-"}
+                </TableCell>
+                <TableCell className="py-3">
+                  {getStatusBadge(submission.status)}
+                </TableCell>
+                <TableCell>
+                  {new Date(submission.createdAt).toLocaleString("zh-CN")}
+                </TableCell>
+                <TableCell>
+                  {submission.status === "pending" && (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        onClick={() => handleReview(submission, "approve")}
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        通过
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleReview(submission, "reject")}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        拒绝
+                      </Button>
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <Tabs value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -119,83 +213,10 @@ export function SubmissionManagement() {
           <TabsTrigger value="rejected">已拒绝</TabsTrigger>
           <TabsTrigger value="all">全部</TabsTrigger>
         </TabsList>
-        <TabsContent value={selectedStatus} className="mt-4">
-          {loading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              加载中...
-            </div>
-          ) : submissions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              暂无数据
-            </div>
-          ) : (
-            <div className="border rounded-lg">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>网站名称</TableHead>
-                    <TableHead>URL</TableHead>
-                    <TableHead>描述</TableHead>
-                    <TableHead>状态</TableHead>
-                    <TableHead>提交时间</TableHead>
-                    <TableHead>操作</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {submissions.map((submission) => (
-                    <TableRow key={submission.id}>
-                      <TableCell className="font-medium">
-                        {submission.title}
-                      </TableCell>
-                      <TableCell>
-                        <a
-                          href={submission.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline flex items-center gap-1"
-                        >
-                          {submission.url}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {submission.description || "-"}
-                      </TableCell>
-                      <TableCell className="py-3">
-                        {getStatusBadge(submission.status)}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(submission.createdAt).toLocaleString("zh-CN")}
-                      </TableCell>
-                      <TableCell>
-                        {submission.status === "pending" && (
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={() => handleReview(submission, "approve")}
-                            >
-                              <Check className="h-4 w-4 mr-1" />
-                              通过
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleReview(submission, "reject")}
-                            >
-                              <X className="h-4 w-4 mr-1" />
-                              拒绝
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </TabsContent>
+        <TabsContent value="pending">{renderTableContent()}</TabsContent>
+        <TabsContent value="approved">{renderTableContent()}</TabsContent>
+        <TabsContent value="rejected">{renderTableContent()}</TabsContent>
+        <TabsContent value="all">{renderTableContent()}</TabsContent>
       </Tabs>
 
       <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
